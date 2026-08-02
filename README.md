@@ -8,10 +8,10 @@ attached to each commit.
 
 ## Quick start
 
-1. Install the latest public version directly from GitHub:
+1. Install the latest standalone release (no Python or uv required):
 
    ```bash
-   uv tool install git+https://github.com/mmcs-work/git-explain-tui.git
+   curl -fsSL https://raw.githubusercontent.com/mmcs-work/git-explain-tui/main/install.sh | sh
    ```
 
 2. Configure an API key if you want AI chat. Browsing branches, commits, and
@@ -61,9 +61,25 @@ provides a common API for supported hosted and local LLM providers.
 **Supported platforms:** macOS and Linux (including Ubuntu). Windows is not
 currently supported because the terminal UI relies on `curses`.
 
+### Standalone executable (easiest)
+
+Each GitHub Release includes native executables for macOS (Apple Silicon and
+Intel) and Linux x86_64. This route needs Git, but not Python, uv, or pip:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mmcs-work/git-explain-tui/main/install.sh | sh
+```
+
+The installer places `git-explain-tui` in `~/.local/bin`. If that directory is
+not on your `PATH`, it prints the one-line command to add it. To choose a
+specific release or installation directory, set `GIT_EXPLAIN_TUI_VERSION` or
+`GIT_EXPLAIN_TUI_INSTALL_DIR` before running it. You can also download an asset
+manually from [GitHub Releases](https://github.com/mmcs-work/git-explain-tui/releases).
+The installer verifies the release asset against its published SHA-256 checksum.
+
 ### Install from PyPI
 
-After a release is published on PyPI, the normal installation command is:
+The normal Python-based installation command is:
 
 ```bash
 uv tool install git-explain-tui

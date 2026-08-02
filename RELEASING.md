@@ -1,9 +1,10 @@
 # Releasing git-explain-tui
 
-This project publishes to PyPI from a version tag through GitHub Actions. It
-uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/), not
-a long-lived API token. The release workflow is
-`.github/workflows/release.yml`.
+This project publishes to PyPI and creates a GitHub Release from a version tag
+through GitHub Actions. It uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/),
+not a long-lived API token. The release workflow is `.github/workflows/release.yml`.
+It also attaches standalone executables for macOS (Apple Silicon and Intel) and
+Linux x86_64, plus a `SHA256SUMS` file used by `install.sh`.
 
 ## One-time PyPI and GitHub setup
 
@@ -43,8 +44,9 @@ a long-lived API token. The release workflow is
    git push origin v0.1.0
    ```
 
-4. Open the repository's **Actions** tab and watch **Release to PyPI**. If the
-   `pypi` environment requires approval, approve its publish job.
+4. Open the repository's **Actions** tab and watch **Release**. If the `pypi`
+   environment requires approval, approve its publish job. After PyPI succeeds,
+   the workflow creates the GitHub Release and attaches the standalone assets.
 5. Verify the project page at
    `https://pypi.org/project/git-explain-tui/`, then test an install in a clean
    shell:
