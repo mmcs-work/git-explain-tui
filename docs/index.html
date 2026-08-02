@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="git-explain-tui is a terminal-first way to understand a repository's history with commit-scoped AI conversations."
+    />
+    <meta name="theme-color" content="#08111f" />
+    <title>git-explain-tui — ask your Git history</title>
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <div class="glow glow-one" aria-hidden="true"></div>
+    <div class="glow glow-two" aria-hidden="true"></div>
+
+    <header class="site-header shell">
+      <a class="brand" href="#top" aria-label="git-explain-tui home">
+        <span class="brand-mark">›_</span> git-explain-tui
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#workflow">How it works</a>
+        <a href="#features">Why it matters</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#install">Install</a>
+      </nav>
+      <a class="header-link" href="#install">Get started <span aria-hidden="true">↓</span></a>
+    </header>
+
+    <main id="top">
+      <section class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="status-dot"></span> Git history, finally conversational</p>
+          <h1>Stop guessing why<br /><em>the code changed.</em></h1>
+          <p class="hero-lede">
+            Browse commits like a proper Git tool. Then ask the change itself
+            what it does, why it exists, and where it might break.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#install">Start exploring <span aria-hidden="true">↓</span></a>
+            <a class="button button-quiet" href="#workflow">See the workflow</a>
+          </div>
+          <div class="proof-row" aria-label="Product highlights">
+            <span><b>4</b> context modes</span>
+            <span><b>5</b> focused panes</span>
+            <span><b>∞</b> better questions</span>
+          </div>
+        </div>
+
+        <div class="terminal-stage" aria-label="git-explain-tui terminal interface preview">
+          <img src="git-explain-tui-interface.png" alt="git-explain-tui browsing commits, focused diffs, changed files, and a saved AI chat" />
+          <span class="pane-label pane-branches" aria-hidden="true">01 · Branches</span>
+          <span class="pane-label pane-commits" aria-hidden="true">02 · Commits</span>
+          <span class="pane-label pane-files" aria-hidden="true">03 · Files</span>
+          <span class="pane-label pane-diff" aria-hidden="true">04 · Diff</span>
+          <span class="pane-label pane-chat" aria-hidden="true">05 · Chat</span>
+        </div>
+      </section>
+
+      <section class="thesis shell">
+        <p class="section-kicker">The problem</p>
+        <div class="thesis-grid">
+          <h2>Every repository has a<br />second codebase: <em>its history.</em></h2>
+          <p>
+            Commit messages are often too short. Diffs are too large. And copying both into a generic chat window loses the thread every time.
+            <strong>git-explain-tui keeps the evidence, the question, and the answer in one place.</strong>
+          </p>
+        </div>
+      </section>
+
+      <section class="workflow shell" id="workflow">
+        <div class="section-heading">
+          <p class="section-kicker">A better investigation loop</p>
+          <h2>From “what is this?” to<br /><em>“I can own this.”</em></h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="step-number">01</span>
+            <div>
+              <h3>Find the moment</h3>
+              <p>Switch branches, filter commit history, and move through focused changes without leaving your terminal.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">02</span>
+            <div>
+              <h3>Control the evidence</h3>
+              <p>Ask about the full patch, a selected file, a concise summary, or a branch range. Big changes stay manageable.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">03</span>
+            <div>
+              <h3>Keep asking better questions</h3>
+              <p>Chats remain scoped to the selected commit, file, or range, so follow-up questions retain their evidence and history.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="feature-grid shell" id="features">
+        <article class="feature feature-wide">
+          <p class="feature-label">Focused context</p>
+          <h3>The diff you need.<br />Not the repository you don’t.</h3>
+          <p>Move from a whole commit to one changed file in a keystroke. Search diffs, filter commits, and make every prompt deliberate.</p>
+          <div class="mini-code"><span>Mode:</span> file <i>·</i> <span>Context:</span> ~3,428 chars</div>
+        </article>
+        <article class="feature accent-green">
+          <p class="feature-label">Built for review</p>
+          <h3>Turn a diff into a review plan.</h3>
+          <p>One-key actions summarize the change, surface risks, suggest tests, explain a bug fix, or draft a PR note.</p>
+          <div class="key-row"><kbd>s</kbd><kbd>R</kbd><kbd>t</kbd><kbd>b</kbd><kbd>p</kbd></div>
+        </article>
+        <article class="feature accent-purple">
+          <p class="feature-label">History that stays useful</p>
+          <h3>Come back to the answer.</h3>
+          <p>Chats are saved per repository and commit. Copy or export the result when it belongs in a review, issue, or release note.</p>
+          <p class="path">.git/git-explain-tui/chats/</p>
+        </article>
+      </section>
+
+      <section class="pricing shell" id="pricing" aria-labelledby="pricing-title">
+        <div class="pricing-copy">
+          <p class="section-kicker">Pricing</p>
+          <h2 id="pricing-title">Free to use.<br /><em>Free as in beer.</em></h2>
+          <p>There is no paid tier, feature gate, or git-explain-tui subscription.</p>
+        </div>
+        <div class="pricing-diff" aria-label="Free and Pro both cost zero dollars">
+          <div class="diff-file">diff --git a/pricing b/pricing</div>
+          <div class="diff-hunk">@@ plans @@</div>
+          <div class="price-row"><span>Free</span><strong>$0</strong></div>
+          <div class="price-row removed"><span>Pro</span><strong>$19/month</strong></div>
+          <div class="price-row added"><span>Pro</span><strong>still $0</strong></div>
+          <p class="pricing-note">Your chosen model provider may charge for its API; local models remain local.</p>
+        </div>
+      </section>
+
+      <section class="quote shell">
+        <p>“A terminal-first tool for the question every unfamiliar commit creates:”</p>
+        <h2>Why did someone do <em>this?</em></h2>
+      </section>
+
+      <section class="install shell" id="install">
+        <div>
+          <p class="section-kicker">Get started</p>
+          <h2>Make your next<br />codebase less mysterious.</h2>
+          <p class="install-copy">Works on macOS and Linux with Python 3.10+ and Git. You can browse immediately; add a model key only when you want chat.</p>
+        </div>
+        <div class="install-stack">
+          <div class="install-card">
+            <div class="install-tabs"><span class="active">Try the interface</span><span>no API key</span></div>
+            <pre><code id="try-command"><span class="dim"># from a git-explain-tui project checkout</span>
+uv tool install .
+
+<span class="dim"># opens this checkout so you can explore right away</span>
+git-explain-tui <span class="string">"$PWD"</span></code></pre>
+            <button class="copy-button" type="button" data-copy-target="try-command">Copy and try it</button>
+            <p class="copy-message" aria-live="polite"></p>
+          </div>
+          <div class="install-card install-card-secondary">
+            <div class="install-tabs"><span class="active">Turn on chat</span><span>optional</span></div>
+            <pre><code id="chat-command"><span class="dim"># choose your provider, then reopen the tool</span>
+export OPENAI_API_KEY=<span class="string">"your-key"</span>
+git-explain-tui <span class="string">"$PWD"</span></code></pre>
+            <button class="copy-button" type="button" data-copy-target="chat-command">Copy chat setup</button>
+            <p class="copy-message" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <a class="brand" href="#top"><span class="brand-mark">›_</span> git-explain-tui</a>
+      <p>AI-assisted Git archaeology for people who want to understand the change.</p>
+      <a href="#install">Install <span aria-hidden="true">↑</span></a>
+    </footer>
+    <script src="site.js"></script>
+  </body>
+</html>

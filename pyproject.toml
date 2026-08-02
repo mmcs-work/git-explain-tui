@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git-explain-tui"
+version = "0.1.0"
+description = "Git commit browser with commit-scoped AI chat"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "GitExplain TUI contributors" }]
+dependencies = ["litellm>=1.0"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.scripts]
+git-explain-tui = "git_explain_tui.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/mmcs-work/git-explain-tui"
+Source = "https://github.com/mmcs-work/git-explain-tui"
+Issues = "https://github.com/mmcs-work/git-explain-tui/issues"
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+include = ["git_explain_tui*"]
