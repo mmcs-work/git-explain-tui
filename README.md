@@ -53,10 +53,10 @@ models do not require an API key.
 - Run `git-explain-tui -h` to see command-line options.
 - Run `git-explain-tui -v` to confirm which installed version is running.
 
-## Install with uv
+## Installation options
 
-Python 3.10+ and Git are required. The installer also brings in LiteLLM, which
-provides a common API for supported hosted and local LLM providers.
+All options need Git. The Python-based options require Python 3.10+ and install
+LiteLLM, which provides a common API for hosted and local LLM providers.
 
 **Supported platforms:** macOS and Linux (including Ubuntu). Windows is not
 currently supported because the terminal UI relies on `curses`.
@@ -79,25 +79,47 @@ The installer verifies the release asset against its published SHA-256 checksum.
 
 ### Install from PyPI
 
-The normal Python-based installation command is:
+Use this if you already use `uv`; it installs the command in an isolated tool
+environment:
 
 ```bash
 uv tool install git-explain-tui
 ```
 
+### Install from PyPI with pipx
+
+`pipx` provides the same isolated-command experience if it is already your
+preferred Python tool manager:
+
+```bash
+pipx install git-explain-tui
+```
+
+### Install into a Python virtual environment
+
+Use this option if you prefer an ordinary Python environment rather than a
+global command:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install git-explain-tui
+git-explain-tui
+```
+
 ### Install the latest GitHub version
 
-Until the first PyPI release, or when you want the newest unreleased changes,
-install directly from this repository:
+Use this when you want unreleased changes from the default branch:
 
 ```bash
 uv tool install git+https://github.com/mmcs-work/git-explain-tui.git
 ```
 
-For local development from a checkout, use `uv tool install .` instead.
+For local development from a checkout, use `uv tool install .` instead, or run
+without installing via `uv run git-explain-tui`.
 
-This installs `git-explain-tui` into uv's user-level tool environment. From any
-Git repository, run:
+After an `uv tool` installation, `git-explain-tui` is available from any Git
+repository:
 
 ```bash
 export OPENAI_API_KEY="..."

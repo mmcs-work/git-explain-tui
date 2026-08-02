@@ -145,7 +145,7 @@
         <div>
           <p class="section-kicker">Get started</p>
           <h2>Make your next<br />codebase less mysterious.</h2>
-          <p class="install-copy">Works on macOS and Linux with Python 3.10+ and Git. You can browse immediately; add a model key only when you want chat.</p>
+          <p class="install-copy">Works on macOS and Linux with Git. The standalone path needs no Python; PyPI options need Python 3.10+. Add a model key only when you want chat.</p>
         </div>
         <div class="install-stack">
           <div class="install-card">
@@ -159,14 +159,26 @@ git-explain-tui</code></pre>
             <p class="copy-message" aria-live="polite"></p>
           </div>
           <div class="install-card install-card-secondary">
-            <div class="install-tabs"><span class="active">Turn on chat</span><span>optional</span></div>
-            <pre><code id="chat-command"><span class="dim"># choose your provider, then reopen the tool</span>
-export OPENAI_API_KEY=<span class="string">"your-key"</span>
-git-explain-tui <span class="string">"$PWD"</span></code></pre>
-            <button class="copy-button" type="button" data-copy-target="chat-command">Copy chat setup</button>
+            <div class="install-tabs"><span class="active">Install from PyPI</span><span>with uv</span></div>
+            <pre><code id="uv-command"><span class="dim"># isolated Python tool installation</span>
+uv tool install git-explain-tui
+
+<span class="dim"># inside any Git repository</span>
+git-explain-tui</code></pre>
+            <button class="copy-button" type="button" data-copy-target="uv-command">Copy uv install</button>
             <p class="copy-message" aria-live="polite"></p>
           </div>
-          <p class="install-copy">Prefer Python tooling? PyPI installs with <code>uv tool install git-explain-tui</code>. The standalone installer requires only Git and curl or wget.</p>
+          <div class="install-card">
+            <div class="install-tabs"><span class="active">Another PyPI option</span><span>with pipx</span></div>
+            <pre><code id="pipx-command"><span class="dim"># if pipx is already installed</span>
+pipx install git-explain-tui
+
+<span class="dim"># then, inside any Git repository</span>
+git-explain-tui</code></pre>
+            <button class="copy-button" type="button" data-copy-target="pipx-command">Copy pipx install</button>
+            <p class="copy-message" aria-live="polite"></p>
+          </div>
+          <p class="install-copy">Developing or need unreleased changes? <code>uv tool install git+https://github.com/mmcs-work/git-explain-tui.git</code>. The README also covers virtual-environment installation.</p>
         </div>
       </section>
     </main>
