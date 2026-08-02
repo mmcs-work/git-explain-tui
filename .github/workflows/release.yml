@@ -1,0 +1,48 @@
+name: Release to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# Building needs repository access; publishing receives a short-lived OIDC token
+# only in the dedicated job below.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      # The suite module keeps its tests package-relative, so run it as a module.
+      - run: uv run python -m unittest tests.test_suite
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/git-explain-tui/
+    permissions:
+      # PyPI exchanges this job's GitHub identity for a short-lived token.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

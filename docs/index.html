@@ -149,13 +149,13 @@
         </div>
         <div class="install-stack">
           <div class="install-card">
-            <div class="install-tabs"><span class="active">Try the interface</span><span>no API key</span></div>
-            <pre><code id="try-command"><span class="dim"># from a git-explain-tui project checkout</span>
-uv tool install .
+            <div class="install-tabs"><span class="active">Install latest</span><span>no API key</span></div>
+            <pre><code id="try-command"><span class="dim"># install directly from GitHub</span>
+uv tool install git+https://github.com/mmcs-work/git-explain-tui.git
 
-<span class="dim"># opens this checkout so you can explore right away</span>
-git-explain-tui <span class="string">"$PWD"</span></code></pre>
-            <button class="copy-button" type="button" data-copy-target="try-command">Copy and try it</button>
+<span class="dim"># inside any Git repository</span>
+git-explain-tui</code></pre>
+            <button class="copy-button" type="button" data-copy-target="try-command">Copy install</button>
             <p class="copy-message" aria-live="polite"></p>
           </div>
           <div class="install-card install-card-secondary">
@@ -166,6 +166,7 @@ git-explain-tui <span class="string">"$PWD"</span></code></pre>
             <button class="copy-button" type="button" data-copy-target="chat-command">Copy chat setup</button>
             <p class="copy-message" aria-live="polite"></p>
           </div>
+          <p class="install-copy">PyPI releases install with <code>uv tool install git-explain-tui</code>. Until the first release is published, the GitHub command above is the supported install path.</p>
         </div>
       </section>
     </main>

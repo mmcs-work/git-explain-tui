@@ -4,14 +4,14 @@
 browsing their commits and diffs, and keeping a separate AI conversation
 attached to each commit.
 
-![git-explain-tui browsing commits, diffs, and AI chat](docs/git-explain-tui-interface.png)
+![git-explain-tui browsing commits, diffs, and AI chat](https://raw.githubusercontent.com/mmcs-work/git-explain-tui/main/docs/git-explain-tui-interface.png)
 
 ## Quick start
 
-1. Install the tool from this checkout:
+1. Install the latest public version directly from GitHub:
 
    ```bash
-   uv tool install .
+   uv tool install git+https://github.com/mmcs-work/git-explain-tui.git
    ```
 
 2. Configure an API key if you want AI chat. Browsing branches, commits, and
@@ -61,9 +61,24 @@ provides a common API for supported hosted and local LLM providers.
 **Supported platforms:** macOS and Linux (including Ubuntu). Windows is not
 currently supported because the terminal UI relies on `curses`.
 
+### Install from PyPI
+
+After a release is published on PyPI, the normal installation command is:
+
 ```bash
-uv tool install .
+uv tool install git-explain-tui
 ```
+
+### Install the latest GitHub version
+
+Until the first PyPI release, or when you want the newest unreleased changes,
+install directly from this repository:
+
+```bash
+uv tool install git+https://github.com/mmcs-work/git-explain-tui.git
+```
+
+For local development from a checkout, use `uv tool install .` instead.
 
 This installs `git-explain-tui` into uv's user-level tool environment. From any
 Git repository, run:
@@ -87,7 +102,7 @@ You can also provide a repository explicitly:
 git-explain-tui /path/to/repository
 ```
 
-After changing the source, reinstall it with `uv tool install --force .`.
+After changing a local checkout, reinstall it with `uv tool install --force .`.
 
 To delete all saved AI chats for the current repository (but keep exported
 Markdown answers), run:
@@ -140,6 +155,12 @@ over large full patches.
 `GIT_EXPLAIN_TUI_API_BASE` (or the legacy `OPENAI_BASE_URL`) supports an
 OpenAI-compatible/local endpoint. See LiteLLM's provider documentation for
 supported model names and provider-specific variables.
+
+## Releasing to PyPI
+
+Maintainers can follow [RELEASING.md](RELEASING.md) to configure PyPI Trusted
+Publishing and publish a tagged release. Releases use GitHub Actions' OpenID
+Connect identity, so no PyPI API token needs to be saved in GitHub.
 
 ## Website on GitHub Pages
 
