@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable, Sequence
+from threading import Lock
 from typing import Any
 
 
@@ -56,12 +57,20 @@ class LLMClient:
         self.max_context_chars = int(
             _setting("GIT_EXPLAIN_TUI_CONTEXT_CHARS", "GIT_EXPLAIN_CONTEXT_CHARS", "40000")
         )
-        if completion is None:
-            # Import lazily so pure Git/UI tests do not need to call a provider.
-            from litellm import completion as litellm_completion
-
-            completion = litellm_completion
+        # LiteLLM has a large import cost. Keep browsing instant and load it only
+        # when the user actually sends their first chat request.
         self._completion = completion
+        self._completion_lock = Lock()
+
+    def _get_completion(self) -> Completion:
+        """Load LiteLLM once, safely if future UI work calls Chat concurrently."""
+        if self._completion is None:
+            with self._completion_lock:
+                if self._completion is None:
+                    from litellm import completion as litellm_completion
+
+                    self._completion = litellm_completion
+        return self._completion
 
     @property
     def provider_model(self) -> str:
@@ -133,7 +142,7 @@ class LLMClient:
                 request["api_key"] = self.api_key
             if self.api_base:
                 request["api_base"] = self.api_base
-            response = self._completion(**request)
+            response = self._get_completion()(**request)
             text = self._response_text(response)
         except Exception as exc:
             raise ChatError(f"LLM request failed: {exc}") from exc

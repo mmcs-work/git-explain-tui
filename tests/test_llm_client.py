@@ -19,6 +19,13 @@ def test_default_model_is_cheap() -> None:
     assert client.max_context_chars == 40000
 
 
+def test_litellm_is_not_loaded_until_chat_is_used() -> None:
+    client = LLMClient(api_key="test")
+
+    # Browsing Git should not pay LiteLLM's import cost before a chat request.
+    assert client._completion is None
+
+
 def test_renamed_settings_prefer_new_names_and_accept_existing_ones() -> None:
     with patch.dict("os.environ", {"GIT_EXPLAIN_MODEL": "ollama/legacy"}, clear=True):
         legacy_client = LLMClient(completion=lambda **_: _response("ok"))
