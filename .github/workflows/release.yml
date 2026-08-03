@@ -5,8 +5,6 @@ on:
     tags:
       - "v*"
 
-# Building needs repository access; publishing receives a short-lived OIDC token
-# only in the dedicated job below.
 permissions:
   contents: read
 
@@ -16,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      # The suite module keeps its tests package-relative, so run it as a module.
       - run: uv run python -m unittest tests.test_suite
 
   build:
@@ -38,7 +35,6 @@ jobs:
       name: pypi
       url: https://pypi.org/project/git-explain-tui/
     permissions:
-      # PyPI exchanges this job's GitHub identity for a short-lived token.
       id-token: write
     steps:
       - uses: actions/download-artifact@v4
@@ -52,26 +48,44 @@ jobs:
     strategy:
       matrix:
         include:
-          # Build separately: PyInstaller executables are tied to their OS/CPU.
           - os: ubuntu-latest
             asset: git-explain-tui-linux-x86_64
-          # macos-13 is retired from GitHub's standard Intel runner pool.
           - os: macos-15-intel
             asset: git-explain-tui-macos-x86_64
           - os: macos-14
             asset: git-explain-tui-macos-arm64
+
     runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+
       - name: Build standalone executable
         run: >-
-          uv run --with pyinstaller pyinstaller --clean --noconfirm --onefile
-          --name ${{ matrix.asset }} --copy-metadata git-explain-tui
-          --paths . --collect-all git_explain_tui --collect-all litellm 
+          uv run --with pyinstaller pyinstaller
+          --clean
+          --noconfirm
+          --onefile
+          --name ${{ matrix.asset }}
+          --copy-metadata git-explain-tui
+          --copy-metadata litellm
+          --copy-metadata tiktoken
+          --paths .
+          --collect-all git_explain_tui
+          --collect-all litellm
+          --collect-all tiktoken
+          --collect-all tiktoken_ext
           --hidden-import curses
           --hidden-import _curses
+          --hidden-import tiktoken_ext.openai_public
           scripts/standalone.py
+
+      - name: Smoke test executable
+        run: |
+          chmod +x "dist/${{ matrix.asset }}"
+          "dist/${{ matrix.asset }}" -v
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset }}
@@ -81,16 +95,20 @@ jobs:
     needs: [publish, binaries]
     runs-on: ubuntu-latest
     permissions:
-      # This is deliberately separate from PyPI's OIDC-only publish job.
       contents: write
+
     steps:
       - uses: actions/download-artifact@v4
         with:
           pattern: git-explain-tui-*
           path: release-assets/
           merge-multiple: true
-      - name: Write checksums for the installer
-        run: cd release-assets && sha256sum git-explain-tui-* > SHA256SUMS
+
+      - name: Write checksums
+        run: |
+          cd release-assets
+          sha256sum git-explain-tui-* > SHA256SUMS
+
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
