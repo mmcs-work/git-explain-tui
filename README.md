@@ -14,15 +14,14 @@ attached to each commit.
    curl -fsSL https://raw.githubusercontent.com/mmcs-work/git-explain-tui/main/install.sh | sh
    ```
 
-2. Configure an API key if you want AI chat. Browsing branches, commits, and
-   diffs works without one. For multiple providers, keep each provider's normal
-   environment variable; LiteLLM selects the right one from the model name:
+2. Configure **one** provider if you want AI chat. Browsing branches, commits,
+   and diffs works without one. For example, to use OpenAI:
 
    ```bash
    export OPENAI_API_KEY="sk-..."
-   export ANTHROPIC_API_KEY="..."
-   export GEMINI_API_KEY="..."
    ```
+
+   See [Configure Chat](#configure-chat-choose-one-provider) for other providers.
 
 3. Start it in the Git repository you want to inspect:
 
@@ -152,6 +151,30 @@ git-explain-tui --clear-history
 Use `git-explain-tui -h` for command help and `git-explain-tui -v` for the installed
 version.
 
+## Configure Chat: choose one provider
+
+`git-explain-tui` uses LiteLLM to talk to hosted and local models. Configure
+the environment variable and model name for **one row** below; you do not need
+accounts or keys for every provider.
+
+| Provider | Required configuration | Example model setting | Notes |
+| --- | --- | --- | --- |
+| OpenAI | `OPENAI_API_KEY` | `GIT_EXPLAIN_TUI_MODEL="gpt-5-nano"` | The default provider; bare model names select OpenAI. |
+| Anthropic | `ANTHROPIC_API_KEY` | `GIT_EXPLAIN_TUI_MODEL="anthropic/claude-sonnet-4-5"` | Use LiteLLM's `provider/model` form. |
+| Google Gemini | `GEMINI_API_KEY` | `GIT_EXPLAIN_TUI_MODEL="gemini/<model-name>"` | Replace `<model-name>` with a Gemini model you can access. |
+| Groq | `GROQ_API_KEY` | `GIT_EXPLAIN_TUI_MODEL="groq/<model-name>"` | Fast hosted inference for supported models. |
+| OpenRouter | `OPENROUTER_API_KEY` | `GIT_EXPLAIN_TUI_MODEL="openrouter/<model-name>"` | Choose any model available through your OpenRouter account. |
+| Ollama (local) | No API key; run `ollama serve` | `GIT_EXPLAIN_TUI_MODEL="ollama/deepseek-coder:1.3b"` | Download the model first with `ollama run …`. |
+| OpenAI-compatible endpoint | `GIT_EXPLAIN_TUI_API_BASE="https://…"` | `GIT_EXPLAIN_TUI_MODEL="<model-name>"` | Add `OPENAI_API_KEY` too only when that endpoint requires one. |
+
+For example, an Anthropic setup is:
+
+```bash
+export ANTHROPIC_API_KEY="..."
+export GIT_EXPLAIN_TUI_MODEL="anthropic/claude-sonnet-4-5"
+git-explain-tui
+```
+
 The default model is `gpt-5-nano`, with a 600-token output cap and a
 40,000-character commit-context cap. Override the cost/quality knobs with:
 
@@ -159,14 +182,6 @@ The default model is `gpt-5-nano`, with a 600-token output cap and a
 export GIT_EXPLAIN_TUI_MODEL="gpt-5-mini" # bare names select OpenAI
 export GIT_EXPLAIN_TUI_MAX_OUTPUT_TOKENS="1200"
 export GIT_EXPLAIN_TUI_CONTEXT_CHARS="80000"
-```
-
-For another provider, use LiteLLM's `provider/model` form and that provider's
-normal API-key environment variable. For example:
-
-```bash
-export GIT_EXPLAIN_TUI_MODEL="anthropic/claude-sonnet-4-5"
-export ANTHROPIC_API_KEY="..."
 ```
 
 For a local Ollama model, download and test a model first:
