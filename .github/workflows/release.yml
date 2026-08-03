@@ -68,7 +68,8 @@ jobs:
         run: >-
           uv run --with pyinstaller pyinstaller --clean --noconfirm --onefile
           --name ${{ matrix.asset }} --copy-metadata git-explain-tui
-          --paths . --collect-all git_explain_tui --hidden-import curses
+          --paths . --collect-all git_explain_tui --collect-all litellm 
+          --hidden-import curses
           --hidden-import _curses
           scripts/standalone.py
       - uses: actions/upload-artifact@v4
