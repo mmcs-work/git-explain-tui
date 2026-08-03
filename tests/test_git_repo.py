@@ -69,7 +69,7 @@ def test_rejects_empty_diff_sha() -> None:
         raise AssertionError("Expected GitError")
 
 
-def test_lists_and_switches_local_branches() -> None:
+def test_lists_and_reads_local_branches_without_switching() -> None:
     calls = []
 
     def runner(command, **kwargs):
@@ -83,14 +83,12 @@ def test_lists_and_switches_local_branches() -> None:
 
     repo = GitRepo(".", runner=runner)
     branches = repo.branches()
-    repo.switch_branch("feature/chat")
+    repo.commits("feature/chat")
 
     assert branches[0].current is True
     assert branches[1].name == "feature/chat"
-    assert any(
-        command[-4:] == ["switch", "--quiet", "--", "feature/chat"]
-        for command in calls
-    )
+    assert any(command[-2:] == ["feature/chat", "--"] for command in calls)
+    assert not any("switch" in command for command in calls)
 
 
 def test_lists_changed_files() -> None:

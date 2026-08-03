@@ -9,7 +9,7 @@ from .test_git_repo import (
     test_context_is_truncated_with_notice,
     test_file_diff_is_scoped_to_path,
     test_ignores_malformed_commit_records,
-    test_lists_and_switches_local_branches,
+    test_lists_and_reads_local_branches_without_switching,
     test_lists_changed_files,
     test_parses_commits,
     test_rejects_empty_diff_sha,
@@ -24,7 +24,7 @@ from .test_llm_client import (
     test_local_ollama_does_not_require_an_api_key,
 )
 from git_explain_tui.app import App, Conversation, Message, QUICK_ACTIONS
-from git_explain_tui.git_repo import Commit, FileChange, GitRepo
+from git_explain_tui.git_repo import Branch, Commit, FileChange, GitRepo
 
 
 class FakeClient:
@@ -52,7 +52,33 @@ class GitExplainTests(unittest.TestCase):
         test_rejects_non_git_directory_with_clear_message()
 
     def test_branch_navigation(self) -> None:
-        test_lists_and_switches_local_branches()
+        test_lists_and_reads_local_branches_without_switching()
+
+    def test_reload_reads_the_selected_branch(self) -> None:
+        class ReadOnlyRepo:
+            root = Path("/repo")
+
+            def branches(self):
+                return [Branch("main", "abc1234", True), Branch("feature", "def5678")]
+
+            def commits(self, ref):
+                self.ref = ref
+                return []
+
+        app = object.__new__(App)
+        app.repo = ReadOnlyRepo()
+        app.client = type("Client", (), {"has_api_key": True})()
+        app.branches = app.repo.branches()
+        app.selected_branch = 1
+        app.commits = []
+        app.selected = 0
+        app.commit_range_anchor = None
+        app.commit_range = None
+        app._load_diff = lambda: None
+
+        app.reload()
+
+        assert app.repo.ref == "feature"
 
     def test_changed_files(self) -> None:
         test_lists_changed_files()

@@ -89,13 +89,16 @@ class GitRepo:
             path.unlink()
         return len(paths)
 
-    def commits(self, limit: int = 500) -> list[Commit]:
+    def commits(self, ref: str = "HEAD", limit: int = 500) -> list[Commit]:
+        """List commits reachable from ``ref`` without changing the worktree."""
         try:
             output = self._git(
                 "log",
                 f"--max-count={limit}",
                 "--date=relative",
                 "--pretty=format:%H%x00%h%x00%s%x00%an%x00%ad%x00%D",
+                ref,
+                "--",
             )
         except GitError as exc:
             if "does not have any commits yet" in str(exc):
@@ -144,16 +147,6 @@ class GitRepo:
                 name, short_sha, head = parts
                 branches.append(Branch(name, short_sha, head == "*"))
         return branches
-
-    def current_branch_name(self) -> str:
-        return self._git("branch", "--show-current").strip()
-
-    def switch_branch(self, name: str) -> None:
-        # Validate against Git's branch list so `--` cannot be mistaken for an option.
-        available = {branch.name for branch in self.branches()}
-        if name not in available:
-            raise GitError(f"Local branch not found: {name}")
-        self._git("switch", "--quiet", "--", name)
 
     def changed_files(self, sha: str) -> list[FileChange]:
         sha = self._validated_sha(sha)
@@ -239,6 +232,7 @@ class GitRepo:
 
     def range_context(
         self,
+        head_ref: str = "HEAD",
         base_branch: str = "main",
         max_chars: int = 120_000,
     ) -> str:
@@ -251,13 +245,13 @@ class GitRepo:
             )
         if not base_branch:
             raise GitError("No base branch available for range context.")
-        head_branch = self.current_branch_name() or "HEAD"
-        merge_base = self._git("merge-base", base_branch, "HEAD").strip()
+        # Use the viewed branch, not HEAD: browsing must never check it out.
+        merge_base = self._git("merge-base", base_branch, head_ref).strip()
         log = self._git(
             "log",
             "--date=short",
             "--pretty=format:%h %ad %an %s",
-            f"{merge_base}..HEAD",
+            f"{merge_base}..{head_ref}",
         )
         diff = self._git(
             "diff",
@@ -266,10 +260,10 @@ class GitRepo:
             "--find-copies",
             "--stat",
             "--patch",
-            f"{merge_base}..HEAD",
+            f"{merge_base}..{head_ref}",
         )
         content = (
-            f"Range: {base_branch}...{head_branch}\n"
+            f"Range: {base_branch}...{head_ref}\n"
             f"Merge base: {merge_base}\n\n"
             f"Commits:\n{log or '[No commits unique to this branch]'}\n\n"
             f"Diff:\n{diff}"

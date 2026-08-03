@@ -1,6 +1,6 @@
 # git-explain-tui
 
-`git-explain-tui` is a terminal UI for switching local branches,
+`git-explain-tui` is a read-only terminal UI for browsing local branches,
 browsing their commits and diffs, and keeping a separate AI conversation
 attached to each commit.
 
@@ -211,7 +211,7 @@ the default branch and the `/docs` folder. GitHub Pages will serve `docs/index.h
 | Key | Action |
 | --- | --- |
 | `j` / `k`, arrows | Select a branch or commit |
-| `Enter` on a branch | Switch to that local branch |
+| `Enter` on a branch | View that local branch without checking it out |
 | `f` | Focus the changed-files pane |
 | `j` / `k`, arrows in files | Select a changed file or `[all files]` |
 | `h` / `l`, left/right in commits | Pan long commit messages horizontally |

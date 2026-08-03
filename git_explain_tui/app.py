@@ -133,7 +133,9 @@ class App:
             else:
                 self.selected_branch = active_index
             current_sha = self.current_commit.sha if self.commits else None
-            self.commits = self.repo.commits()
+            # Selecting a branch changes only the revision passed to `git log`.
+            # It deliberately never changes the caller's checked-out branch.
+            self.commits = self.repo.commits(self.selected_branch_ref)
             # Commit positions may point to different history after a reload.
             self.commit_range_anchor = None
             self.commit_range = None
@@ -154,6 +156,11 @@ class App:
     @property
     def current_commit(self) -> Commit:
         return self.commits[self.selected]
+
+    @property
+    def selected_branch_ref(self) -> str:
+        """The local branch currently being viewed, or HEAD for an empty list."""
+        return self.branches[self.selected_branch].name if self.branches else "HEAD"
 
     @property
     def conversation(self) -> Conversation | None:
@@ -342,27 +349,17 @@ class App:
         elif key in ("k", curses.KEY_UP) and self.branches:
             self.selected_branch = max(0, self.selected_branch - 1)
         elif key in ("\n", "\r", curses.KEY_ENTER, curses.KEY_RIGHT, "l"):
-            self._switch_selected_branch()
+            self._view_selected_branch()
         elif key == "r":
             self.reload()
 
-    def _switch_selected_branch(self) -> None:
+    def _view_selected_branch(self) -> None:
         if not self.branches:
             return
         branch = self.branches[self.selected_branch]
-        if branch.current:
-            self.focus = "commits"
-            self.status = f"Already on {branch.name}"
-            return
-        try:
-            self.status = f"Switching to {branch.name}…"
-            self.repo.switch_branch(branch.name)
-            self.commits = []
-            self.reload()
-            self.focus = "commits"
-            self.status = f"Switched to {branch.name}"
-        except GitError as exc:
-            self.status = f"Could not switch branch: {exc}"
+        self.reload()
+        self.focus = "commits"
+        self.status = f"Viewing {branch.name} (read-only; working tree unchanged)"
 
     def _handle_browser_key(self, key: int | str) -> None:
         if key in ("q", "Q"):
@@ -804,7 +801,9 @@ class App:
                     self.commits[newer_index].sha,
                     max_chars=max_chars,
                 )
-            return self.repo.range_context(max_chars=max_chars)
+            return self.repo.range_context(
+                head_ref=self.selected_branch_ref, max_chars=max_chars
+            )
         return self.repo.context(sha, max_chars=max_chars)
 
     def _context_preview(self) -> int:
@@ -1338,7 +1337,7 @@ class App:
         """Size the help box from its content so key descriptions never overflow it."""
         bindings = [
             ("j/k or ↑/↓", "select branch/commit"),
-            ("Enter", "switch selected branch"),
+            ("Enter", "view selected branch (read-only)"),
             ("f", "focus changed files"),
             ("m", "cycle chat context mode"),
             ("s/R/t/b/p", "summary/risks/tests/bug/PR note"),
