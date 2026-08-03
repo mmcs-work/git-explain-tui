@@ -12,7 +12,7 @@ body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity
 .site-header { height:88px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; border-bottom:1px solid var(--line); }
 .brand { color:var(--ink); font-weight:800; text-decoration:none; letter-spacing:-.04em; font-size:18px; }
 .brand-mark { color:var(--cyan); font-family:"DM Mono",monospace; margin-right:6px; }
-nav { display:flex; gap:26px; } nav a,.header-link,.footer a { color:var(--muted); text-decoration:none; font-size:13px; font-weight:700; } nav a:hover,.header-link:hover,.footer a:hover { color:var(--cyan); }
+nav { display:flex; gap:26px; } nav a,.header-link,.footer a { color:var(--muted); text-decoration:none; font-size:13px; font-weight:700; } nav a:hover,.header-link:hover,.footer a:hover { color:var(--cyan); }.github-mark { width:15px; height:15px; margin-right:6px; vertical-align:-2px; filter:invert(1); opacity:.82; } a:hover .github-mark { opacity:1; }
 .header-link { color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:10px 14px; }
 .hero { min-height:680px; display:grid; grid-template-columns:1fr 1.1fr; gap:40px; align-items:center; padding:88px 0 76px; position:relative; }
 .eyebrow,.section-kicker,.feature-label { color:var(--cyan); font-family:"DM Mono",monospace; font-size:12px; font-weight:500; letter-spacing:.07em; text-transform:uppercase; }
