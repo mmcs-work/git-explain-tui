@@ -83,6 +83,9 @@ class App:
         self.search_matches: list[int] = []
         self.search_index = -1
         self.chat_scroll = 0
+        self.show_context_preview = False
+        self.context_preview_lines: list[str] = []
+        self.context_preview_scroll = 0
         self.input_text = ""
         self.focus = "branches"
         self.pane_jump_active = False
@@ -248,6 +251,9 @@ class App:
         if self.show_help:
             self.show_help = False
             return
+        if getattr(self, "show_context_preview", False):
+            self._handle_context_preview_key(key)
+            return
         if self.pending_question:
             self._handle_pending_key(key)
             return
@@ -259,6 +265,7 @@ class App:
             curses.KEY_BTAB,
             "\x1b[Z",
             "/",
+            "v",
         ):
             self._require_range_selection_completion()
             return
@@ -291,6 +298,9 @@ class App:
             return
         if key == "?":
             self.show_help = True
+            return
+        if key == "v":
+            self._open_context_preview()
             return
         if key == "/":
             if self.focus == "commits":
@@ -816,6 +826,36 @@ class App:
             )
         return self.repo.context(sha, max_chars=max_chars)
 
+    def _open_context_preview(self) -> None:
+        """Build the exact Git payload now, so the popup cannot drift from an AI request."""
+        if not self.commits:
+            self.status = "No commit context to preview."
+            return
+        try:
+            self.context_preview_lines = self._chat_context(self.current_commit.sha).splitlines()
+        except GitError as exc:
+            self.status = f"Could not build context preview: {exc}"
+            return
+        self.context_preview_scroll = 0
+        self.show_context_preview = True
+
+    def _handle_context_preview_key(self, key: int | str) -> None:
+        """Scroll the read-only context popup without changing the selected Git scope."""
+        if key in ("\x1b", "v"):
+            self.show_context_preview = False
+        elif key == curses.KEY_UP:
+            self.context_preview_scroll = max(0, self.context_preview_scroll - 1)
+        elif key == curses.KEY_PPAGE:
+            self.context_preview_scroll = max(0, self.context_preview_scroll - 10)
+        elif key == curses.KEY_HOME:
+            self.context_preview_scroll = 0
+        elif key in (curses.KEY_DOWN, curses.KEY_NPAGE):
+            self.context_preview_scroll += 10 if key == curses.KEY_NPAGE else 1
+        elif key == curses.KEY_END:
+            self.context_preview_scroll = len(self.context_preview_lines)
+        else:
+            self.show_context_preview = False
+
     def _context_preview(self) -> int:
         if not self.commits:
             return 0
@@ -1077,6 +1117,8 @@ class App:
 
         if self.show_help:
             self._draw_help(height, width)
+        elif self.show_context_preview:
+            self._draw_context_preview(height, width)
         elif input_cursor_x is not None:
             # Drawing the status line moves curses' physical cursor.  Put it
             # back in the active question field immediately before refresh.
@@ -1301,6 +1343,8 @@ class App:
 
         visible = max(1, height - 1)
         max_scroll = max(0, len(lines) - visible)
+        # Chat is bottom-anchored: zero means the newest answer is visible.
+        # Keeping this separate from diff scrolling avoids moving the prompt.
         self.chat_scroll = min(self.chat_scroll, max_scroll)
         if self.chat_scroll:
             indicator = f"↑ {self.chat_scroll} lines"
@@ -1314,6 +1358,31 @@ class App:
         start = max(0, len(lines) - visible - self.chat_scroll)
         for row, (line, attr) in enumerate(lines[start : start + visible]):
             self._pane_add(y + 1 + row, x, width, line, attr)
+
+    def _draw_context_preview(self, height: int, width: int) -> None:
+        """Overlay the selected Git payload; explanatory lines are not sent to the model."""
+        curses.curs_set(0)
+        top, left = 1, 2
+        box_height, box_width = height - 2, width - 4
+        for row in range(box_height):
+            self._pane_add(top + row, left, box_width, "", curses.color_pair(7))
+
+        title = f" LLM CONTEXT PREVIEW [{self.context_mode}] "
+        self._pane_add(top, left + 1, box_width - 2, title, curses.color_pair(7) | curses.A_BOLD)
+        note = "Git context sent with the next request; follow-ups also include saved chat history."
+        self._pane_add(top + 1, left + 1, box_width - 2, note, curses.color_pair(7) | curses.A_DIM)
+
+        visible = max(1, box_height - 4)
+        max_scroll = max(0, len(self.context_preview_lines) - visible)
+        self.context_preview_scroll = min(self.context_preview_scroll, max_scroll)
+        start = self.context_preview_scroll
+        for row, line in enumerate(self.context_preview_lines[start : start + visible]):
+            self._pane_add(top + 2 + row, left + 1, box_width - 2, line, self._diff_attr(line))
+
+        position = f"{start + 1}/{max(1, len(self.context_preview_lines))}"
+        footer = "↑/↓ PgUp/PgDn Home/End: scroll  •  Esc or v: close"
+        self._pane_add(top + box_height - 1, left + 1, box_width - len(position) - 3, footer, curses.color_pair(7) | curses.A_DIM)
+        self._pane_add(top + box_height - 1, left + box_width - len(position) - 1, len(position), position, curses.color_pair(7) | curses.A_DIM)
 
     def _draw_input(self, y: int, width: int, x: int) -> int | None:
         """Draw the one-line modal/chat input and return the cursor column when editing."""
@@ -1359,6 +1428,7 @@ class App:
             ("Enter", "view selected branch (read-only)"),
             ("f", "focus changed files"),
             ("m", "cycle chat context mode"),
+            ("v", "preview selected Git context for the LLM"),
             ("s/R/t/b/p", "summary/risks/tests/bug/PR note"),
             ("y/Y/e", "copy answer/context/export"),
             ("h/l or ←/→", "pan commits/diff"),

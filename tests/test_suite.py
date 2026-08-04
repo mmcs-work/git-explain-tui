@@ -324,6 +324,27 @@ class GitExplainTests(unittest.TestCase):
 
         assert app._request_context_preview(conversation) == len("+change") + 1 + len("Question") + 1 + len("Answer") + 1
 
+    def test_context_popup_uses_the_same_payload_as_an_ai_request(self) -> None:
+        app = object.__new__(App)
+        app.commits = [
+            Commit(
+                sha="a" * 40,
+                short_sha="aaaaaaa",
+                subject="Change thing",
+                author="Ada",
+                relative_date="today",
+            )
+        ]
+        app.selected = 0
+        app.context_mode = "file"
+        app._chat_context = lambda sha: "commit context\n+diff --git a/a.py b/a.py"
+
+        app._open_context_preview()
+
+        assert app.context_preview_lines == ["commit context", "+diff --git a/a.py b/a.py"]
+        assert app.context_preview_scroll == 0
+        assert app.show_context_preview is True
+
     def test_clear_chat_history_keeps_exports(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             git_dir = Path(temp_dir)
