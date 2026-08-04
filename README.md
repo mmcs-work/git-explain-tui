@@ -233,6 +233,8 @@ the default branch and the `/docs` folder. GitHub Pages will serve `docs/index.h
 | `d` | Focus the diff pane |
 | `j` / `k`, arrows in diff | Scroll the diff |
 | `J` / `K`, Page Down/Up | Scroll the diff by a page |
+| arrows in chat | Scroll saved chat history without editing the question |
+| Page Down/Up, Home/End in chat | Scroll a chat page; jump to the oldest/latest message |
 | `/` in commits | Filter commits by message, SHA, author, or ref |
 | `Enter` after filtering | Open chat for the selected matching commit |
 | `/` elsewhere | Search the displayed diff |

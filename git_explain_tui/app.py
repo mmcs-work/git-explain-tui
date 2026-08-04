@@ -569,6 +569,16 @@ class App:
             self.chat_scroll += 1
         elif key == curses.KEY_DOWN:
             self.chat_scroll = max(0, self.chat_scroll - 1)
+        # Keep navigation keys out of the question editor.  Unlike j/k, they
+        # are safe to reserve because people naturally use those letters in chat.
+        elif key == curses.KEY_PPAGE:
+            self.chat_scroll += 10
+        elif key == curses.KEY_NPAGE:
+            self.chat_scroll = max(0, self.chat_scroll - 10)
+        elif key == curses.KEY_HOME:
+            self.chat_scroll = len(getattr(getattr(self, "conversation", None), "messages", ()))
+        elif key == curses.KEY_END:
+            self.chat_scroll = 0
         elif isinstance(key, str) and key.isprintable():
             self.input_text += key
 
@@ -1292,6 +1302,15 @@ class App:
         visible = max(1, height - 1)
         max_scroll = max(0, len(lines) - visible)
         self.chat_scroll = min(self.chat_scroll, max_scroll)
+        if self.chat_scroll:
+            indicator = f"↑ {self.chat_scroll} lines"
+            self._pane_add(
+                y,
+                max(x + 1, x + width - len(indicator) - 1),
+                len(indicator),
+                indicator,
+                curses.A_DIM,
+            )
         start = max(0, len(lines) - visible - self.chat_scroll)
         for row, (line, attr) in enumerate(lines[start : start + visible]):
             self._pane_add(y + 1 + row, x, width, line, attr)
@@ -1346,6 +1365,8 @@ class App:
             ("d", "focus diff"),
             ("j/k or ↑/↓", "scroll focused diff"),
             ("J/K or PgDn/Up", "scroll diff page"),
+            ("↑/↓ or PgDn/Up", "scroll chat history"),
+            ("Home/End", "first/latest chat message"),
             ("0", "reset horizontal pan"),
             ("g/G", "first/last commit"),
             ("Space then Space", "select consecutive commit range"),

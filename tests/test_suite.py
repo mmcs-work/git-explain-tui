@@ -427,6 +427,21 @@ class GitExplainTests(unittest.TestCase):
         assert app.input_text == "what changed?"
         assert app.show_help is False
 
+    def test_chat_navigation_keys_scroll_without_editing_question(self) -> None:
+        app = object.__new__(App)
+        app.focus = "chat"
+        app.show_help = False
+        app.pending_question = None
+        app.input_text = "what changed?"
+        app.chat_scroll = 0
+
+        app.handle_key(curses.KEY_PPAGE)
+        app.handle_key(curses.KEY_UP)
+        app.handle_key(curses.KEY_NPAGE)
+
+        assert app.chat_scroll == 1
+        assert app.input_text == "what changed?"
+
     def test_tab_cycles_focus_from_chat(self) -> None:
         app = object.__new__(App)
         app.focus = "chat"
