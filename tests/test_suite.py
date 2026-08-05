@@ -38,6 +38,20 @@ class FakeRepo:
         self.git_dir = git_dir
 
 
+class FakeScreen:
+    """Capture curses writes so pane boundaries can be tested without a terminal."""
+    def __init__(self, height: int = 24, width: int = 80):
+        self.height = height
+        self.width = width
+        self.writes: list[tuple[int, int, str, int]] = []
+
+    def getmaxyx(self) -> tuple[int, int]:
+        return self.height, self.width
+
+    def addnstr(self, y: int, x: int, text: str, count: int, attr: int = 0) -> None:
+        self.writes.append((y, x, text, count))
+
+
 class GitExplainTests(unittest.TestCase):
     def test_commit_parsing(self) -> None:
         test_parses_commits()
@@ -113,6 +127,17 @@ class GitExplainTests(unittest.TestCase):
         assert "tests" in QUICK_ACTIONS["t"]
         assert "bug" in QUICK_ACTIONS["b"]
         assert "PR" in QUICK_ACTIONS["p"]
+
+    def test_right_pane_never_writes_the_terminal_edge(self) -> None:
+        app = object.__new__(App)
+        app.screen = FakeScreen(width=80)
+
+        # A long diff line begins in the right pane and must stay one cell shy
+        # of the terminal edge, where terminals may autowrap to the next row.
+        app._pane_add(2, 30, 50, "x" * 200)
+
+        _, x, _, count = app.screen.writes[0]
+        assert x + count == 79
 
     def test_chat_shortcut_expands_to_an_explicit_prompt(self) -> None:
         assert App._expand_quick_action("s") == (

@@ -36,9 +36,11 @@ attached to each commit.
    git-explain-tui /path/to/a/git-repository
    ```
 
-Use the arrow keys to select a branch and commit, `f` to select a changed
-file, then `Tab` to reach Chat and ask a question. Press `?` outside Chat for
-the complete keyboard reference.
+Use the arrow keys to select a branch and commit. Press `Enter` on a branch to
+load its commits, files, and diff into the other panes; this changes only the
+view and never checks out or switches your working-tree branch. Press `f` to
+select a changed file, then `Tab` to reach Chat and ask a question. Press `?`
+outside Chat for the complete keyboard reference.
 
 If the path is not a Git repository, `git-explain-tui` exits with a clear error.
 If no compatible API key is configured, Git browsing still works and Chat shows
@@ -226,7 +228,7 @@ the default branch and the `/docs` folder. GitHub Pages will serve `docs/index.h
 | Key | Action |
 | --- | --- |
 | `j` / `k`, arrows | Select a branch or commit |
-| `Enter` on a branch | View that local branch without checking it out |
+| `Enter` on a branch | Load that branch's commits, files, and diff without checking it out |
 | `f` | Focus the changed-files pane |
 | `j` / `k`, arrows in files | Select a changed file or `[all files]` |
 | `h` / `l`, left/right in commits | Pan long commit messages horizontally |

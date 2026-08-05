@@ -1095,6 +1095,12 @@ class App:
         file_height = max(5, left_height // 4)
         commit_y = body_top + branch_height + 1
         file_y = input_y - file_height
+        # Paint the right side first.  Some terminal emulators can report a
+        # wrapped final cell from a full-width write; drawing the left panes
+        # last guarantees their headings and rows restore their own columns.
+        self._draw_diff(body_top, diff_height, right_x, right_width)
+        self._hline(chat_y - 1, width, right_x)
+        self._draw_chat(chat_y, chat_height, right_x, right_width)
         self._draw_branches(body_top, branch_height, left_width)
         self._hline(commit_y - 1, left_width)
         # Keep the row immediately above FILES for its separator.  The commits
@@ -1104,10 +1110,9 @@ class App:
         self._draw_commits(commit_y, max(1, file_y - commit_y - 1), left_width)
         self._hline(file_y - 1, left_width)
         self._draw_files(file_y, input_y - file_y, left_width)
+        # The divider is last for the same reason: it must stay crisp even if
+        # a right-pane write is rendered imperfectly by the terminal.
         self._vline(left_width, body_top, input_y - body_top)
-        self._draw_diff(body_top, diff_height, right_x, right_width)
-        self._hline(chat_y - 1, width, right_x)
-        self._draw_chat(chat_y, chat_height, right_x, right_width)
         input_cursor_x = self._draw_input(input_y, width, right_x)
         preview = self._preview_text()
         status = self.status
@@ -1296,13 +1301,16 @@ class App:
             if line_index in self.search_matches:
                 attr |= curses.A_REVERSE
             self._pane_add(y + row + 1, x, width, shown, attr)
-        indicator = f"{self.diff_scroll + 1}/{max(1, len(self.diff_lines))}"
+        # Always show the horizontal position so long, clipped lines advertise
+        # that h/l or the arrow keys can pan them instead of wrapping.
+        indicator = (
+            f"{self.diff_scroll + 1}/{max(1, len(self.diff_lines))} "
+            f"· x+{self.diff_x_scroll}/{max_x_scroll}"
+        )
         if self.search_matches and self.search_index >= 0:
             indicator = (
                 f"find {self.search_index + 1}/{len(self.search_matches)} · {indicator}"
             )
-        if self.diff_x_scroll:
-            indicator += f" x+{self.diff_x_scroll}"
         self._pane_add(y, max(x + 1, x + width - len(indicator) - 1), len(indicator), indicator, curses.A_DIM)
 
     def _draw_chat(self, y: int, height: int, x: int, width: int) -> None:
@@ -1514,7 +1522,10 @@ class App:
         height, screen_width = self.screen.getmaxyx()
         if y < 0 or y >= height or x < 0 or x >= screen_width or width <= 0:
             return
-        room = min(width, screen_width - x)
+        # Leave the terminal's final column untouched.  Writing there can
+        # autowrap in some terminals, making a long diff line appear to spill
+        # out of its pane even though the text was sliced for horizontal panning.
+        room = min(width, screen_width - x - 1)
         if room <= 0:
             return
         shown = text[:room].ljust(room)
