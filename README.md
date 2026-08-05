@@ -6,6 +6,13 @@ attached to each commit.
 
 ![git-explain-tui browsing commits, diffs, and AI chat](https://raw.githubusercontent.com/mmcs-work/git-explain-tui/main/docs/git-explain-tui-interface.png)
 
+## See it in action
+
+Watch a short terminal recording of branch browsing, commit inspection, focused
+diffs, and AI chat:
+
+[![Watch the asciinema demo](https://asciinema.org/a/ZhtKH5TNaXpxT9NU.svg)](https://asciinema.org/a/ZhtKH5TNaXpxT9NU)
+
 ## Quick start
 
 1. Install the latest standalone release (no Python or uv required):
