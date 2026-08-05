@@ -1,0 +1,7 @@
+/* Additional layout for the detailed reference sections. */
+.two-column { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.two-column > div { padding:18px; border:1px solid var(--line); border-radius:7px; background:rgba(9,24,39,.48); }
+.two-column h3 { margin:0; color:var(--cyan); font-size:16px; }
+.two-column p { margin:8px 0 0; font-size:13px; line-height:1.7; }
+.tour.compact li { padding:15px 0; }
+@media (max-width:560px) { .two-column { grid-template-columns:1fr; } .tour.compact li { grid-template-columns:1fr; gap:4px; } }

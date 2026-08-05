@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#07111e" />
     <title>Documentation — git-explain-tui</title>
     <link rel="stylesheet" href="docs.css" />
+    <link rel="stylesheet" href="reference.css" />
   </head>
   <body>
     <header class="topbar">
@@ -24,12 +25,16 @@
           <a href="#start">Start here</a>
           <a href="#install">Install</a>
           <a href="#providers">Choose a model</a>
+          <a href="#configuration">Configuration</a>
           <a href="#tour">A guided tour</a>
+          <a href="#find">Find and navigate</a>
           <a href="#contexts">Context modes</a>
+          <a href="#requests">Request lifecycle</a>
           <a href="#chat">Chat and history</a>
           <a href="#ranges">Commit ranges</a>
           <a href="#keys">Keyboard reference</a>
           <a href="#privacy">Privacy and storage</a>
+          <a href="#reliability">Reliability and limits</a>
           <a href="#troubleshooting">Troubleshooting</a>
         </nav>
         <p class="sidebar-note">git-explain-tui is read-only: browsing a branch never checks it out.</p>
@@ -70,8 +75,25 @@ git-explain-tui</pre></div>
           <div class="callout"><b>Local Ollama example</b><p>First run <code>ollama run deepseek-coder:1.3b</code>, then set <code>GIT_EXPLAIN_MODEL="ollama/deepseek-coder:1.3b"</code>. Use <code>summary</code> or <code>file</code> mode with small local models.</p></div>
         </section>
 
+        <section id="configuration" data-searchable>
+          <p class="kicker">03 · Configuration reference</p>
+          <h2>Every setting and command-line option.</h2>
+          <p>Use the public <code>GIT_EXPLAIN_TUI_…</code> variables. Older <code>GIT_EXPLAIN_…</code> names remain supported for the same settings.</p>
+          <div class="table-wrap"><table><thead><tr><th>Setting</th><th>Default</th><th>Purpose</th></tr></thead><tbody>
+            <tr><td><code>GIT_EXPLAIN_TUI_MODEL</code></td><td><code>gpt-5-nano</code></td><td>Model name. Bare names select OpenAI; other providers use <code>provider/model</code>.</td></tr>
+            <tr><td><code>GIT_EXPLAIN_TUI_CONTEXT_CHARS</code></td><td><code>40000</code></td><td>Maximum selected Git context sent in a request. Any truncation is marked in the payload.</td></tr>
+            <tr><td><code>GIT_EXPLAIN_TUI_MAX_OUTPUT_TOKENS</code></td><td><code>600</code></td><td>Maximum requested answer length.</td></tr>
+            <tr><td><code>GIT_EXPLAIN_TUI_API_BASE</code></td><td>unset</td><td>Base URL for an OpenAI-compatible endpoint; <code>OPENAI_BASE_URL</code> also works.</td></tr>
+          </tbody></table></div>
+          <div class="code-card"><div><b>Useful commands</b><button data-copy="commands">Copy</button></div><pre id="commands">git-explain-tui -h
+git-explain-tui -v
+git-explain-tui /path/to/repository
+git-explain-tui --clear-history</pre></div>
+          <p><code>--clear-history</code> removes this tool’s saved chat JSON files for the selected repository, including pre-rename history. It keeps exported Markdown and text files.</p>
+        </section>
+
         <section id="tour" data-searchable>
-          <p class="kicker">03 · A guided tour</p>
+          <p class="kicker">04 · A guided tour</p>
           <h2>Five panes, one investigation loop.</h2>
           <ol class="tour">
             <li><b>01 · Branches</b><span>Use arrows to select a branch. Press <kbd>Enter</kbd> to load its commits, files, and diff into the other panes. This changes only the view—it never checks out the branch or changes the working tree.</span></li>
@@ -82,8 +104,15 @@ git-explain-tui</pre></div>
           </ol>
         </section>
 
+        <section id="find" data-searchable>
+          <p class="kicker">05 · Find and navigate</p>
+          <h2>Search the right thing in the right pane.</h2>
+          <div class="two-column"><div><h3>Filter commits</h3><p>Focus Commits and press <kbd>/</kbd>. The filter matches subject, SHA, author, and Git decorations. Arrow keys move through matching commits while the filter is open. Press <kbd>Enter</kbd> to keep the filter, or <kbd>Esc</kbd> to cancel editing. Clear the query and press <kbd>Enter</kbd> to show all history.</p></div><div><h3>Search the diff</h3><p>Outside Commits, <kbd>/</kbd> searches the displayed diff. Press <kbd>Enter</kbd> to run the search, then <kbd>n</kbd> or <kbd>N</kbd> for the next or previous match. Matching lines are highlighted and the count appears in the Diff header.</p></div></div>
+          <p>Long commit messages and diff lines do not wrap into another pane. Pan Commit or Diff with <kbd>h</kbd>/<kbd>l</kbd> or ←/→, use <kbd>H</kbd>/<kbd>L</kbd> for a larger step, and press <kbd>0</kbd> to reset.</p>
+        </section>
+
         <section id="contexts" data-searchable>
-          <p class="kicker">04 · Context modes</p>
+          <p class="kicker">06 · Context modes</p>
           <h2>Send only the evidence your question needs.</h2>
           <p>Press <kbd>m</kbd> to cycle modes. The status line estimates context size before the first send, so you can balance cost and detail.</p>
           <div class="mode-grid">
@@ -93,10 +122,18 @@ git-explain-tui</pre></div>
             <article><b>range</b><p>An inclusive commit range and its combined diff. Chosen automatically for a selected range.</p></article>
           </div>
           <div class="callout cyan"><b>Inspect before sending</b><p>Press <kbd>v</kbd> outside the Chat editor to open an LLM Context Preview. It displays the exact Git context sent with the next request. Use arrows, Page Up/Down, or Home/End to inspect it.</p></div>
+          <p>In <code>file</code> mode, <code>[all files]</code> intentionally sends a summary—not every patch. Select one file for its diff, or choose <code>patch</code> for the complete commit.</p>
+        </section>
+
+        <section id="requests" data-searchable>
+          <p class="kicker">07 · Request lifecycle</p>
+          <h2>Know exactly what reaches a model.</h2>
+          <ol class="tour compact"><li><b>System instruction</b><span>The model is asked to act as a code-review companion, cite changed paths and lines where possible, and distinguish patch facts from inference.</span></li><li><b>Selected Git context</b><span>The summary, patch, focused file, or range is sent separately from your question. Press <kbd>v</kbd> to inspect this exact portion.</span></li><li><b>Saved conversation</b><span>On follow-ups, prior user and assistant messages for the same scope are included. Local error messages are not sent to the provider.</span></li><li><b>Your question</b><span>The current question is sent last, so it remains the active instruction.</span></li></ol>
+          <p>Before a first send, the status line estimates context plus saved history. Around 30,000 characters, the app pauses: <kbd>y</kbd> sends, <kbd>f</kbd> switches to file mode, <kbd>s</kbd> sends summary mode, and <kbd>Esc</kbd> cancels. The configured context cap is enforced independently.</p>
         </section>
 
         <section id="chat" data-searchable>
-          <p class="kicker">05 · Chat and history</p>
+          <p class="kicker">08 · Chat and history</p>
           <h2>Ask deliberately, then keep the answer attached to the change.</h2>
           <p>Type a question and press <kbd>Enter</kbd>. For common tasks, use a quick action outside the Chat editor:</p>
           <div class="key-grid"><span><kbd>s</kbd> summarize</span><span><kbd>R</kbd> review risks</span><span><kbd>t</kbd> suggest tests</span><span><kbd>b</kbd> explain bug fixed</span><span><kbd>p</kbd> draft PR note</span></div>
@@ -105,34 +142,49 @@ git-explain-tui</pre></div>
         </section>
 
         <section id="ranges" data-searchable>
-          <p class="kicker">06 · Commit ranges</p>
+          <p class="kicker">09 · Commit ranges</p>
           <h2>Review a sequence without losing it.</h2>
           <p>In Commits, press <kbd>Space</kbd> on the first commit, move to the second endpoint, and press <kbd>Space</kbd> again. The combined diff remains pinned while you browse. Files now represent the entire range; selecting one narrows that pinned diff to a file.</p>
           <p>Range selection is intentionally modal: finish with <kbd>Space</kbd>, or cancel with <kbd>x</kbd>, before switching panes. Chat history for a range belongs only to those exact endpoints.</p>
         </section>
 
         <section id="keys" data-searchable>
-          <p class="kicker">07 · Keyboard reference</p>
-          <h2>The essentials.</h2>
-          <div class="keys"><div><kbd>Tab</kbd><span>next pane</span></div><div><kbd>Shift+Tab</kbd><span>previous pane</span></div><div><kbd>Ctrl+g</kbd> then <kbd>b/c/f/d/h</kbd><span>jump directly to a pane</span></div><div><kbd>?</kbd><span>open the full in-app reference</span></div><div><kbd>r</kbd><span>reload Git history</span></div><div><kbd>q</kbd><span>quit</span></div></div>
-          <p>The <a href="https://github.com/mmcs-work/git-explain-tui#keyboard">README keyboard table</a> lists every shortcut in one place.</p>
+          <p class="kicker">10 · Complete keyboard reference</p>
+          <h2>Every shortcut, by purpose.</h2>
+          <div class="table-wrap"><table><thead><tr><th>Where</th><th>Keys</th><th>Action</th></tr></thead><tbody>
+            <tr><td>Branches</td><td><kbd>j</kbd>/<kbd>k</kbd>, ↑/↓</td><td>Select a local branch.</td></tr><tr><td>Branches</td><td><kbd>Enter</kbd>, →, <kbd>l</kbd></td><td>Load that branch into the other panes without checkout.</td></tr>
+            <tr><td>Commits</td><td><kbd>j</kbd>/<kbd>k</kbd>, ↑/↓; <kbd>J</kbd>/<kbd>K</kbd>; <kbd>g</kbd>/<kbd>G</kbd></td><td>Move by line, page, or first/last through visible history.</td></tr><tr><td>Commits</td><td><kbd>Space</kbd>, move, <kbd>Space</kbd></td><td>Start then complete an inclusive range; <kbd>x</kbd> clears it.</td></tr>
+            <tr><td>Files</td><td><kbd>f</kbd>; <kbd>j</kbd>/<kbd>k</kbd></td><td>Focus and select a changed file or <code>[all files]</code>.</td></tr><tr><td>Diff</td><td><kbd>d</kbd>; <kbd>j</kbd>/<kbd>k</kbd>; <kbd>J</kbd>/<kbd>K</kbd></td><td>Focus and scroll the diff by line or page.</td></tr>
+            <tr><td>Commit / Diff</td><td><kbd>h</kbd>/<kbd>l</kbd>, ←/→; <kbd>H</kbd>/<kbd>L</kbd>; <kbd>0</kbd></td><td>Pan long lines, pan farther, or reset position.</td></tr><tr><td>Search</td><td><kbd>/</kbd>, <kbd>Enter</kbd>, <kbd>n</kbd>/<kbd>N</kbd></td><td>Filter Commits or search the displayed diff.</td></tr>
+            <tr><td>Context</td><td><kbd>m</kbd>; <kbd>v</kbd></td><td>Cycle context mode; preview the exact selected Git payload.</td></tr><tr><td>Quick actions</td><td><kbd>s</kbd>, <kbd>R</kbd>, <kbd>t</kbd>, <kbd>b</kbd>, <kbd>p</kbd></td><td>Summarize, review risks, suggest tests, explain a bug, or draft a PR note.</td></tr>
+            <tr><td>Chat</td><td><kbd>Enter</kbd></td><td>Send the typed question. Printable keys in Chat are always text.</td></tr><tr><td>Chat history</td><td>↑/↓, Page Up/Down, Home/End</td><td>Read older saved messages without editing a question.</td></tr>
+            <tr><td>Outputs</td><td><kbd>y</kbd> / <kbd>Y</kbd> / <kbd>e</kbd></td><td>Copy answer / copy context / export Markdown.</td></tr><tr><td>Navigation</td><td><kbd>Tab</kbd> / Shift+Tab</td><td>Next / previous pane, wrapping around.</td></tr><tr><td>Navigation</td><td>Ctrl+<kbd>g</kbd>, then <kbd>b</kbd>/<kbd>c</kbd>/<kbd>f</kbd>/<kbd>d</kbd>/<kbd>h</kbd></td><td>Jump to branches / commits / files / diff / chat.</td></tr><tr><td>General</td><td><kbd>r</kbd>, <kbd>?</kbd>, <kbd>q</kbd></td><td>Reload history, open help (outside Chat), quit.</td></tr>
+          </tbody></table></div>
         </section>
 
         <section id="privacy" data-searchable>
-          <p class="kicker">08 · Privacy and storage</p>
+          <p class="kicker">11 · Privacy and storage</p>
           <h2>Your repository stays in control.</h2>
           <p>The tool is read-only with respect to Git: it never checks out a branch, stages files, creates commits, or rewrites history. Chat data is local to the repository:</p>
           <div class="path">.git/git-explain-tui/chats/</div>
           <p>Exports are written under <code>.git/git-explain-tui/exports/</code>. Every stored question and answer records the model used. Hosted models receive the selected context and conversation history; local Ollama models keep that request on your machine.</p>
         </section>
 
+        <section id="reliability" data-searchable>
+          <p class="kicker">12 · Reliability and limits</p>
+          <h2>What is safe, and what needs judgment.</h2>
+          <div class="two-column"><div><h3>Read-only Git browsing</h3><p>Branch viewing uses a Git ref for history commands. It never runs <code>git switch</code>, changes HEAD, stages files, creates commits, or rewrites history. Only chats and exports are written beneath this tool’s own directory in <code>.git</code>.</p></div><div><h3>Fast launch</h3><p>The app reads up to 500 commits for the selected branch. LiteLLM is imported only after the first chat request, so ordinary browsing is not held up by model-provider initialization.</p></div><div><h3>Supported platforms</h3><p>macOS and Linux, including Ubuntu, are supported. Windows is not currently supported because the terminal UI relies on <code>curses</code>.</p></div><div><h3>Model answers</h3><p>Answers can be mistaken. Treat the diff and context preview as the source of truth, especially for security, migration, or production decisions.</p></div></div>
+        </section>
+
         <section id="troubleshooting" data-searchable>
-          <p class="kicker">09 · Troubleshooting</p>
+          <p class="kicker">13 · Troubleshooting</p>
           <h2>Quick answers to common problems.</h2>
           <details><summary>“This is not a Git repository.”</summary><p>Run the command inside a repository, or pass its path: <code>git-explain-tui /path/to/repository</code>.</p></details>
           <details><summary>Chat says an API key is missing.</summary><p>Git browsing still works. Set one provider key such as <code>OPENAI_API_KEY</code>, or configure a local model with <code>GIT_EXPLAIN_MODEL="ollama/…"</code>.</p></details>
           <details><summary>A patch is too large or costly.</summary><p>Choose <code>summary</code> or <code>file</code> mode with <kbd>m</kbd>, and press <kbd>v</kbd> to inspect the payload before sending.</p></details>
           <details><summary>A long diff line does not fit.</summary><p>Focus Diff with <kbd>d</kbd>, then pan with <kbd>h</kbd>/<kbd>l</kbd> or ←/→. The horizontal counter shows your position.</p></details>
+          <details><summary>I changed file or context mode and my old chat disappeared.</summary><p>That is expected. Conversation identity includes the commit, mode, and selected file when in file mode. Returning to the same scope resumes its saved history.</p></details>
+          <details><summary>I started a range but cannot switch panes.</summary><p>Range selection is intentionally modal. Move to another commit and press <kbd>Space</kbd> to finish, or press <kbd>x</kbd> to cancel.</p></details>
         </section>
       </article>
     </main>
