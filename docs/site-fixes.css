@@ -1,0 +1,8 @@
+/* Keep installation commands readable at every viewport width.  CSS wrapping
+   changes only their visual layout; the Copy button still reads the original text. */
+.install-card pre {
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
