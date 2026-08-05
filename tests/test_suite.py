@@ -139,6 +139,17 @@ class GitExplainTests(unittest.TestCase):
         _, x, _, count = app.screen.writes[0]
         assert x + count == 79
 
+    def test_diff_horizontal_home_and_end_keys(self) -> None:
+        app = object.__new__(App)
+        app.diff_lines = ["x" * 120]
+        app.diff_x_scroll = 48
+
+        app._handle_diff_key("H")
+        assert app.diff_x_scroll == 0
+
+        app._handle_diff_key("L")
+        assert app.diff_x_scroll == 120
+
     def test_chat_shortcut_expands_to_an_explicit_prompt(self) -> None:
         assert App._expand_quick_action("s") == (
             "Quick action [s]: " + QUICK_ACTIONS["s"]

@@ -452,10 +452,12 @@ class App:
             self.diff_x_scroll += 8
         elif key in (curses.KEY_LEFT, "h"):
             self.diff_x_scroll = max(0, self.diff_x_scroll - 8)
-        elif key in (curses.KEY_SRIGHT, "L"):
-            self.diff_x_scroll += 24
-        elif key == "H":
-            self.diff_x_scroll = max(0, self.diff_x_scroll - 24)
+        # Capital H/L are dependable horizontal home/end actions.  They avoid
+        # the ambiguous "did it move?" feeling of a larger fixed-size step.
+        elif key in (getattr(curses, "KEY_SRIGHT", -1), "L"):
+            self.diff_x_scroll = max((len(line) for line in self.diff_lines), default=0)
+        elif key in (getattr(curses, "KEY_SLEFT", -1), "H"):
+            self.diff_x_scroll = 0
         elif key in ("0", "^"):
             self.diff_x_scroll = 0
         elif key == "g":
@@ -1440,6 +1442,7 @@ class App:
             ("s/R/t/b/p", "summary/risks/tests/bug/PR note"),
             ("y/Y/e", "copy answer/context/export"),
             ("h/l or ←/→", "pan commits/diff"),
+            ("H/L", "diff: jump to horizontal left/right edge"),
             ("d", "focus diff"),
             ("j/k or ↑/↓", "scroll focused diff"),
             ("J/K or PgDn/Up", "scroll diff page"),

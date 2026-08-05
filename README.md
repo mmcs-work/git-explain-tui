@@ -242,6 +242,7 @@ the default branch and the `/docs` folder. GitHub Pages will serve `docs/index.h
 | `/` elsewhere | Search the displayed diff |
 | `n` / `N` | Next / previous diff search match |
 | `h` / `l`, left/right in diff | Pan long diff lines horizontally |
+| `H` / `L` in diff | Jump to the horizontal left / right edge |
 | `0` in commits/diff | Reset horizontal pan |
 | `m` | Cycle chat context mode: summary, patch, file, range |
 | `v` outside chat | Preview the exact selected Git context before it is sent to the LLM |
