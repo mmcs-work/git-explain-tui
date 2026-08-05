@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="The complete guide to git-explain-tui: installation, Git browsing, context modes, AI chat, and troubleshooting." />
+    <meta name="theme-color" content="#07111e" />
+    <title>Documentation — git-explain-tui</title>
+    <link rel="stylesheet" href="docs.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="../"><span>›_</span> git-explain-tui</a>
+      <div class="top-actions">
+        <a href="../">Product site</a>
+        <a href="https://github.com/mmcs-work/git-explain-tui">GitHub ↗</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar" aria-label="Documentation navigation">
+        <p class="sidebar-title">Documentation</p>
+        <nav>
+          <a href="#start">Start here</a>
+          <a href="#install">Install</a>
+          <a href="#providers">Choose a model</a>
+          <a href="#tour">A guided tour</a>
+          <a href="#contexts">Context modes</a>
+          <a href="#chat">Chat and history</a>
+          <a href="#ranges">Commit ranges</a>
+          <a href="#keys">Keyboard reference</a>
+          <a href="#privacy">Privacy and storage</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+        </nav>
+        <p class="sidebar-note">git-explain-tui is read-only: browsing a branch never checks it out.</p>
+      </aside>
+
+      <article class="content">
+        <section class="doc-hero" id="start">
+          <p class="eyebrow">Complete guide</p>
+          <h1>Understand the change.<br /><em>Keep control of the context.</em></h1>
+          <p class="lede">git-explain-tui is a terminal interface for investigating Git history and asking focused AI questions about the commit, file, or range you have selected.</p>
+          <label class="search"><span>⌕</span><input id="doc-search" type="search" placeholder="Search this guide" autocomplete="off" /><kbd>/</kbd></label>
+          <p class="search-status" id="search-status" aria-live="polite"></p>
+        </section>
+
+        <section id="install" data-searchable>
+          <p class="kicker">01 · Install</p>
+          <h2>Get to your first commit in a minute.</h2>
+          <p>The standalone installer is the simplest route on macOS and Linux. It needs Git, but not Python, uv, or pip.</p>
+          <div class="code-card"><div><b>Standalone</b><button data-copy="install-command">Copy</button></div><pre id="install-command">curl -fsSL https://raw.githubusercontent.com/mmcs-work/git-explain-tui/main/install.sh | sh
+cd /path/to/a/git-repository
+git-explain-tui</pre></div>
+          <p>If you already use Python tooling, either option installs an isolated command:</p>
+          <div class="two-cards"><code>uv tool install git-explain-tui</code><code>pipx install git-explain-tui</code></div>
+          <p>Run <code>git-explain-tui -h</code> for options, or pass a repository path directly: <code>git-explain-tui /path/to/repository</code>.</p>
+        </section>
+
+        <section id="providers" data-searchable>
+          <p class="kicker">02 · Choose a model</p>
+          <h2>Git browsing needs no key. Chat needs one model.</h2>
+          <p>Choose a single hosted provider or a local Ollama model. The current model is always visible in the upper-right corner of the interface.</p>
+          <div class="table-wrap"><table><thead><tr><th>Provider</th><th>Set this</th><th>Example model</th></tr></thead><tbody>
+            <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td><code>gpt-5-nano</code></td></tr>
+            <tr><td>Anthropic</td><td><code>ANTHROPIC_API_KEY</code></td><td><code>anthropic/…</code></td></tr>
+            <tr><td>Gemini</td><td><code>GEMINI_API_KEY</code></td><td><code>gemini/…</code></td></tr>
+            <tr><td>Groq / OpenRouter</td><td>Provider API key</td><td>Provider-prefixed model</td></tr>
+            <tr><td>Ollama</td><td>No API key</td><td><code>ollama/deepseek-coder:1.3b</code></td></tr>
+          </tbody></table></div>
+          <div class="callout"><b>Local Ollama example</b><p>First run <code>ollama run deepseek-coder:1.3b</code>, then set <code>GIT_EXPLAIN_MODEL="ollama/deepseek-coder:1.3b"</code>. Use <code>summary</code> or <code>file</code> mode with small local models.</p></div>
+        </section>
+
+        <section id="tour" data-searchable>
+          <p class="kicker">03 · A guided tour</p>
+          <h2>Five panes, one investigation loop.</h2>
+          <ol class="tour">
+            <li><b>01 · Branches</b><span>Use arrows to select a branch. Press <kbd>Enter</kbd> to load its commits, files, and diff into the other panes. This changes only the view—it never checks out the branch or changes the working tree.</span></li>
+            <li><b>02 · Commits</b><span>Move through the loaded history with <kbd>j</kbd>/<kbd>k</kbd>. Use <kbd>/</kbd> to filter by message, SHA, author, or ref.</span></li>
+            <li><b>03 · Files</b><span>Press <kbd>f</kbd> to choose one changed file. Select <code>[all files]</code> to return to the full commit view.</span></li>
+            <li><b>04 · Diff</b><span>Press <kbd>d</kbd> to focus the colorized diff. Scroll vertically with <kbd>j</kbd>/<kbd>k</kbd>, and pan long lines with <kbd>h</kbd>/<kbd>l</kbd> or ←/→.</span></li>
+            <li><b>05 · Chat</b><span>Use <kbd>Tab</kbd> or <kbd>Ctrl+g</kbd>, then <kbd>h</kbd>, to reach the question field. Conversations are scoped to the selected change.</span></li>
+          </ol>
+        </section>
+
+        <section id="contexts" data-searchable>
+          <p class="kicker">04 · Context modes</p>
+          <h2>Send only the evidence your question needs.</h2>
+          <p>Press <kbd>m</kbd> to cycle modes. The status line estimates context size before the first send, so you can balance cost and detail.</p>
+          <div class="mode-grid">
+            <article><b>summary</b><p>Commit metadata, file list, and statistics. Best for a cheap overview.</p></article>
+            <article><b>patch</b><p>The complete selected commit patch. Use when changes interact across files.</p></article>
+            <article><b>file</b><p>Only the selected file diff. This is the default and is ideal for focused code questions.</p></article>
+            <article><b>range</b><p>An inclusive commit range and its combined diff. Chosen automatically for a selected range.</p></article>
+          </div>
+          <div class="callout cyan"><b>Inspect before sending</b><p>Press <kbd>v</kbd> outside the Chat editor to open an LLM Context Preview. It displays the exact Git context sent with the next request. Use arrows, Page Up/Down, or Home/End to inspect it.</p></div>
+        </section>
+
+        <section id="chat" data-searchable>
+          <p class="kicker">05 · Chat and history</p>
+          <h2>Ask deliberately, then keep the answer attached to the change.</h2>
+          <p>Type a question and press <kbd>Enter</kbd>. For common tasks, use a quick action outside the Chat editor:</p>
+          <div class="key-grid"><span><kbd>s</kbd> summarize</span><span><kbd>R</kbd> review risks</span><span><kbd>t</kbd> suggest tests</span><span><kbd>b</kbd> explain bug fixed</span><span><kbd>p</kbd> draft PR note</span></div>
+          <p>Follow-ups reuse the selected Git context and saved conversation. Normal letters remain ordinary text while editing a question, so typing <code>?</code>, <code>s</code>, or <code>R</code> never triggers an action by accident.</p>
+          <p>Use ↑/↓ or Page Up/Down in Chat to read loaded history; Home and End jump to the oldest and newest message. Use <kbd>y</kbd> to copy the latest answer, <kbd>Y</kbd> to copy context, and <kbd>e</kbd> to export an answer as Markdown.</p>
+        </section>
+
+        <section id="ranges" data-searchable>
+          <p class="kicker">06 · Commit ranges</p>
+          <h2>Review a sequence without losing it.</h2>
+          <p>In Commits, press <kbd>Space</kbd> on the first commit, move to the second endpoint, and press <kbd>Space</kbd> again. The combined diff remains pinned while you browse. Files now represent the entire range; selecting one narrows that pinned diff to a file.</p>
+          <p>Range selection is intentionally modal: finish with <kbd>Space</kbd>, or cancel with <kbd>x</kbd>, before switching panes. Chat history for a range belongs only to those exact endpoints.</p>
+        </section>
+
+        <section id="keys" data-searchable>
+          <p class="kicker">07 · Keyboard reference</p>
+          <h2>The essentials.</h2>
+          <div class="keys"><div><kbd>Tab</kbd><span>next pane</span></div><div><kbd>Shift+Tab</kbd><span>previous pane</span></div><div><kbd>Ctrl+g</kbd> then <kbd>b/c/f/d/h</kbd><span>jump directly to a pane</span></div><div><kbd>?</kbd><span>open the full in-app reference</span></div><div><kbd>r</kbd><span>reload Git history</span></div><div><kbd>q</kbd><span>quit</span></div></div>
+          <p>The <a href="https://github.com/mmcs-work/git-explain-tui#keyboard">README keyboard table</a> lists every shortcut in one place.</p>
+        </section>
+
+        <section id="privacy" data-searchable>
+          <p class="kicker">08 · Privacy and storage</p>
+          <h2>Your repository stays in control.</h2>
+          <p>The tool is read-only with respect to Git: it never checks out a branch, stages files, creates commits, or rewrites history. Chat data is local to the repository:</p>
+          <div class="path">.git/git-explain-tui/chats/</div>
+          <p>Exports are written under <code>.git/git-explain-tui/exports/</code>. Every stored question and answer records the model used. Hosted models receive the selected context and conversation history; local Ollama models keep that request on your machine.</p>
+        </section>
+
+        <section id="troubleshooting" data-searchable>
+          <p class="kicker">09 · Troubleshooting</p>
+          <h2>Quick answers to common problems.</h2>
+          <details><summary>“This is not a Git repository.”</summary><p>Run the command inside a repository, or pass its path: <code>git-explain-tui /path/to/repository</code>.</p></details>
+          <details><summary>Chat says an API key is missing.</summary><p>Git browsing still works. Set one provider key such as <code>OPENAI_API_KEY</code>, or configure a local model with <code>GIT_EXPLAIN_MODEL="ollama/…"</code>.</p></details>
+          <details><summary>A patch is too large or costly.</summary><p>Choose <code>summary</code> or <code>file</code> mode with <kbd>m</kbd>, and press <kbd>v</kbd> to inspect the payload before sending.</p></details>
+          <details><summary>A long diff line does not fit.</summary><p>Focus Diff with <kbd>d</kbd>, then pan with <kbd>h</kbd>/<kbd>l</kbd> or ←/→. The horizontal counter shows your position.</p></details>
+        </section>
+      </article>
+    </main>
+    <footer><span>git-explain-tui documentation</span><a href="../">Back to product site ↑</a></footer>
+    <script src="docs.js"></script>
+  </body>
+</html>
